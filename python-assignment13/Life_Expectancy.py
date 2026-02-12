@@ -130,3 +130,59 @@ db_clean["Health Expenditure Per Capita"] = db_clean["Total expenditure"] / (db_
 print("info")
 db_clean.info()
 print()
+
+
+# Aggregation
+
+# Global life-expectancy trend
+db_clean_globaltrend = (db_clean.groupby('Year')['Life expectancy'].mean())
+print("db_clean_globaltrend\n", db_clean_globaltrend)
+## Global Life Expectancy Trend
+# By aggregating life expectancy by year, we can observe a clear upward global trend,
+# indicating overall improvements in healthcare, living standards, and disease prevention worldwide.
+
+# Trends for developing vs developed
+db_clean_devtrend = (db_clean.groupby(['Year', 'Status'])['Life expectancy'].mean().reset_index())
+print("db_clean_devtrend\n", db_clean_devtrend)
+print()
+
+### Life Expectancy Trends by Country Status (2000–2015)
+
+# This table shows the **average life expectancy** for Developed and Developing countries 
+# over 15 years.  
+
+# **Observations:**  
+# - Developed countries consistently have higher life expectancy than Developing countries.  
+# - The gap between Developed and Developing countries remains fairly stable over time.  
+# - There is a slight upward trend for both groups, indicating gradual improvements in health 
+# over the period.
+
+# Stability of Country Status Over Time
+db_clean_count_country = db_clean.groupby(['Year', 'Status'])['Country'].nunique()
+print("db_clean_count_country", db_clean_count_country)
+print()
+
+# When analyzing the dataset from 2000 to 2015, it is noticeable that the number of countries 
+# classified as Developed and Developing remains almost constant over the 15-year period.
+
+# Developed countries consistently number around 32.
+# Developing countries consistently number around 151–161.
+# This indicates that, within this dataset, no countries changed their status from Developing 
+# to Developed during these years.
+
+# Interpretation:
+# This pattern may reflect the dataset’s classification criteria rather than real-world economic 
+# transitions. While it highlights a limitation in observing status changes over time, 
+# it still allows us to analyze other factors, such as life expectancy, mortality, 
+# and healthcare indicators, across these two groups of countries.
+
+# Life expectancy in countries, Adult Mortality vs Alcohol
+db_clean_adultvsalcohol = db_clean.groupby('Country')[['Adult Mortality', 'Alcohol']].mean().reset_index()
+print("db_clean_adultvsalcohol", db_clean_adultvsalcohol)
+# The dataset was grouped by country to calculate the average Adult Mortality and 
+# Alcohol consumption for each country. 
+
+# Life expectancy deciles (10 buckets) vs various driving factors
+db_clean['GDP Decile'] = pd.qcut(db_clean["GDP"], q=10, labels=False)
+db_clean_GDP_Decile_trend = db_clean.groupby('GDP Decile')['Life expectancy'].mean().reset_index()
+
