@@ -28,13 +28,88 @@ db = pd.read_csv(csv_path)
 # The dataset contains country-level health, economic, and demographic indicators collected over multiple years.
 
 # checking
-# print("--columns--")
-# print(db.columns)
-# print()
+print("--columns--")
+print(db.columns)
+print()
 
-# print("--info--")
-# db.info()
-# print()
+print("--info--")
+db.info()
+print()
 
 # No additional data type conversion was required, as all numerical and categorical
 # features were already stored in appropriate formats.
+
+
+# Data cleaning
+
+print("--describe--\n", db.describe())
+print()
+for col in db:
+    print("--describe--\n", db[col].describe().tail(2)) # max vs 75%
+
+# The descriptive statistics reveal a wide range of values across several features. 
+# For example, variables such as infant deaths, measles cases, and GDP show large differences 
+# between the 75th percentile and maximum values, indicating the presence of potential outliers.
+
+print("--nan--")
+print(db.isna().sum())
+print()
+# Several numerical features contain missing values. 
+# Columns such as Population, Hepatitis B, GDP, and Schooling have a relatively high proportion of missing 
+# observations and require imputation.
+
+print('--duplicated--\n', db.duplicated().sum())
+# No duplicated rows were found in the dataset.
+# # The descriptive statistics revealed missing values across multiple numerical features, 
+# as well as a wide range of values in variables such as GDP and Adult Mortality, 
+# indicating potential outliers. Some features, including Schooling and 
+# Income composition of resources, contained zero values which may represent either true 
+# measurements or missing data encoded as zeros.
+
+print("Unique countries")
+print(sorted(db['Country'].unique()))
+print()
+# The list of unique country names was inspected to identify inconsistencies or 
+# multiple representations of the same country.
+# Although some countries appear under their formal WHO designations 
+# (e.g., “United Kingdom of Great Britain and Northern Ireland”, “Iran (Islamic Republic of)”), 
+#  no duplicate naming formats were found.
+# Each country appears only once in a consistent format. Therefore, no country name standardization 
+# was required.
+
+# Original dataset was preserved before cleaning steps were applied
+db_clean = db.copy()
+#print('--db_clean--\n', db_clean.head())
+db_clean.columns = db_clean.columns.str.strip()
+#print('db_clean.columns\n', db_clean.columns)
+# print()
+# Column names were stripped of leading and trailing whitespace to ensure
+# consistent column referencing.
+
+# 
+nan_percent = (db_clean.isna().sum() / len(db_clean) * 100).round(1)
+print("nan_percent.sort_values\n", nan_percent.sort_values(ascending=False))
+print()
+# The percentage of missing values varies across features.
+# Imputation strategies were selected based on the proportion of missing data
+# in each column.
+
+# Missing values were handled using two strategies:
+# Columns with a significant proportion of missing values (Population, Hepatitis B, GDP, Total expenditure, Alcohol, Income composition of resources, Schooling) were imputed using the median.
+# Columns with few missing values (<2%) were filled using simple imputation (fillna), preserving the overall distribution.
+# Columns with no missing values were left unchanged.
+
+for col in db_clean.columns:
+    if not pd.api.types.is_numeric_dtype(db_clean[col]): # int type
+        continue
+    if 0 < nan_percent[col] <= 1.2:
+        db_clean[col] = db_clean[col].fillna(db_clean[col].mean())
+    
+    if 1.2 < nan_percent[col] <= 50:
+        db_clean[col] = db_clean[col].fillna(db_clean[col].median())
+
+# Missing values were handled using two strategies:
+# - Columns with a small proportion of missing values (≤ 1.2%) were imputed
+#   using the mean.
+# - Columns with a higher proportion of missing values (> 1.2% and ≤ 50%)
+#   were imputed using the median to reduce the influence of outliers.
