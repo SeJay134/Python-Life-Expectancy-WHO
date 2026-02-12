@@ -113,3 +113,20 @@ for col in db_clean.columns:
 #   using the mean.
 # - Columns with a higher proportion of missing values (> 1.2% and ≤ 50%)
 #   were imputed using the median to reduce the influence of outliers.
+
+
+# Feature Engineering
+
+# Additional features were created to better capture relationships between
+# health, economic, and demographic factors and life expectancy.
+
+# Life Expectancy Difference
+db_clean['Life Expectancy Difference'] = db_clean.groupby('Country')['Life expectancy'].transform(lambda x: x.max() - x.min())
+# Life expectancy vs Adult Mortality & Alcohol
+db_clean["Mortality Alcohol Index"] = db_clean["Adult Mortality"] * db_clean["Alcohol"]
+# Total expenditure vs Population
+db_clean["Health Expenditure Per Capita"] = db_clean["Total expenditure"] / (db_clean["Population"] / 1000000)
+
+print("info")
+db_clean.info()
+print()
