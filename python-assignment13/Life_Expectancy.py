@@ -36,6 +36,8 @@ print("--info--")
 db.info()
 print()
 
+print(db.dtypes)
+print()
 # No additional data type conversion was required, as all numerical and categorical
 # features were already stored in appropriate formats.
 
@@ -114,6 +116,15 @@ for col in db_clean.columns:
 # - Columns with a higher proportion of missing values (> 1.2% and ≤ 50%)
 #   were imputed using the median to reduce the influence of outliers.
 
+# Threshold of 1–2% was selected because small proportions of missing data are unlikely to bias mean imputation.
+
+## Data Cleaning Summary
+
+# - Stripped column names
+# - Imputed missing values (mean ≤1.2%, median >1.2%)
+# - Verified no duplicates
+# - Verified country naming consistency
+# - No type conversion required
 
 # Feature Engineering
 
@@ -124,6 +135,7 @@ for col in db_clean.columns:
 db_clean['Life Expectancy Difference'] = db_clean.groupby('Country')['Life expectancy'].transform(lambda x: x.max() - x.min())
 # Life expectancy vs Adult Mortality & Alcohol
 db_clean["Mortality Alcohol Index"] = db_clean["Adult Mortality"] * db_clean["Alcohol"]
+# This index attempts to capture the combined burden of alcohol consumption and adult mortality risk.
 # Total expenditure vs Population
 db_clean["Health Expenditure Per Capita"] = db_clean["Total expenditure"] / (db_clean["Population"] / 1000000)
 
@@ -275,7 +287,7 @@ This suggests structural differences in healthcare access, income levels, educat
 """)
 
 # Plot 3
-# Life expectancy in countries, Adult Mortality vs Alcohol
+# Life expectancy in countries and Adult Mortality
 df_mortality = db_clean.groupby("Country")[[
     "Life expectancy",
     "Adult Mortality"
